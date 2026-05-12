@@ -1,0 +1,25 @@
+# Release Please: Conventional Commits 기반으로 릴리즈 PR, CHANGELOG, GitHub Release, 태그(v*)를 관리합니다.
+# - 릴리즈 PR 머지 시 버전·태그가 반영됩니다.
+# - 릴리즈 PR에서 CI가 돌게 하려면 PAT 시크릿을 쓰는 방식을 docs/RELEASE_PLEASE.md를 참고하세요.
+
+name: release-please
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          # 기본 토큰: 릴리즈 PR/태그는 생성되지만, 그 PR로는 다른 워크플로가 트리거되지 않을 수 있음(GitHub 제약).
+          token: ${{ secrets.GITHUB_TOKEN }}

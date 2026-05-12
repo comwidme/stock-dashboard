@@ -134,7 +134,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "url과 title이 필요합니다." }, { status: 400 });
   }
 
-  const model = "gemini-2.5-flash";
+  const model = "gemini-2.5-flash-lite";
 
   const prompt = [
     "너는 뉴스 기사 요약 전문가다. 아래 제목/링크의 기사 내용을 바탕으로 요약해라.",
