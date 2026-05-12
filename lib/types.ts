@@ -33,3 +33,14 @@ export type SymbolLookupDto = {
   isFallback: boolean;
 };
 
+export type NewsSummaryRequestDto = {
+  url: string;
+  title: string;
+};
+
+export type NewsSummaryDto = {
+  url: string;
+  title: string;
+  summaryKo: string;
+};
+

@@ -23,13 +23,13 @@ export const SAMPLE_NEWS: Record<string, CompanyNewsItemDto[]> = {
       headline: "Apple releases a new update for its ecosystem",
       source: "Sample News",
       datetime: nowSec - 60 * 60 * 6,
-      url: "https://example.com/aapl-1",
+      url: "https://www.apple.com/newsroom/",
     },
     {
       headline: "Market reacts to Apple's quarterly results",
       source: "Sample News",
       datetime: nowSec - 60 * 60 * 20,
-      url: "https://example.com/aapl-2",
+      url: "https://investor.apple.com/investor-relations/default.aspx",
     },
   ],
   MSFT: [
@@ -37,7 +37,7 @@ export const SAMPLE_NEWS: Record<string, CompanyNewsItemDto[]> = {
       headline: "Microsoft announces new cloud features",
       source: "Sample News",
       datetime: nowSec - 60 * 60 * 8,
-      url: "https://example.com/msft-1",
+      url: "https://news.microsoft.com/",
     },
   ],
   NVDA: [
@@ -45,7 +45,7 @@ export const SAMPLE_NEWS: Record<string, CompanyNewsItemDto[]> = {
       headline: "NVIDIA highlights AI hardware roadmap",
       source: "Sample News",
       datetime: nowSec - 60 * 60 * 10,
-      url: "https://example.com/nvda-1",
+      url: "https://nvidianews.nvidia.com/",
     },
   ],
   TSLA: [
@@ -53,7 +53,7 @@ export const SAMPLE_NEWS: Record<string, CompanyNewsItemDto[]> = {
       headline: "EV market update: new production milestones",
       source: "Sample News",
       datetime: nowSec - 60 * 60 * 12,
-      url: "https://example.com/tsla-1",
+      url: "https://www.tesla.com/blog",
     },
   ],
 };
