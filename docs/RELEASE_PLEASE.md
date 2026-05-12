@@ -2,7 +2,7 @@
 
 ## 동작
 
-- `master`에 푸시될 때마다 GitHub Actions가 [release-please](https://github.com/googleapis/release-please)를 실행합니다.
+- `main`에 푸시될 때마다 GitHub Actions가 [release-please](https://github.com/googleapis/release-please)를 실행합니다.
 - [Conventional Commits](https://www.conventionalcommits.org/) 형식의 커밋이 쌓이면 **릴리즈 PR**이 열리거나 갱신됩니다.
 - 그 PR을 머지하면 **`CHANGELOG.md` 갱신**, **`package.json` 버전 bump**, **`v*` 태그**, **GitHub Release**가 생성됩니다.
 
