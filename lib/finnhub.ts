@@ -1,3 +1,5 @@
+import { Agent } from "undici";
+
 type FinnhubQuoteResponse = {
   c: number; // current
   pc: number; // previous close
@@ -23,24 +25,43 @@ type FinnhubSymbolLookupResponse = {
 
 const FINNHUB_BASE_URL = "https://finnhub.io/api/v1";
 
+const tlsInsecure =
+  process.env.FINNHUB_TLS_INSECURE === "1" || process.env.FINNHUB_TLS_INSECURE === "true";
+
+/** 로컬 개발용(사내 CA 미설치 등). 프로덕션에서는 사용하지 말 것. */
+const finnhubDispatcher =
+  tlsInsecure && process.env.NODE_ENV !== "production"
+    ? new Agent({ connect: { rejectUnauthorized: false } })
+    : undefined;
+
+if (finnhubDispatcher) {
+  console.warn(
+    "[finnhub] FINNHUB_TLS_INSECURE 활성화: TLS 검증을 건너뜁니다. 가능하면 NODE_EXTRA_CA_CERTS로 기업 루트 인증서를 등록하세요.",
+  );
+}
+
 export class FinnhubConfigError extends Error {
   override name = "FinnhubConfigError";
 }
 
 const getApiKey = (): string => {
-  const key = process.env.FINNHUB_API_KEY;
+  const raw = process.env.FINNHUB_API_KEY;
+  const key = typeof raw === "string" ? raw.trim().replace(/^["']|["']$/g, "") : "";
   if (!key) throw new FinnhubConfigError("Missing FINNHUB_API_KEY");
   return key;
 };
 
 const fetchJson = async <T>(url: string): Promise<T> => {
-  const res = await fetch(url, {
+  const init: RequestInit & { dispatcher?: Agent } = {
     headers: {
       accept: "application/json",
     },
     // App Router route handlers run on server; avoid caching during demos
     cache: "no-store",
-  });
+  };
+  if (finnhubDispatcher) init.dispatcher = finnhubDispatcher;
+
+  const res = await fetch(url, init);
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Finnhub request failed: ${res.status} ${text}`);

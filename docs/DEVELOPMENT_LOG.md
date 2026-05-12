@@ -19,10 +19,12 @@
 | 변수 | 용도 |
 |------|------|
 | `FINNHUB_API_KEY` | 주가·뉴스·티커 검색 (서버 Route Handler만 호출) |
+| `FINNHUB_TLS_INSECURE` | (선택, **로컬만**) `1`이면 Finnhub 호출 시 TLS 검증 생략. 사내 프록시 등으로 `unable to verify certificate`가 날 때. **프로덕션에서는 사용 금지.** |
 | `GEMINI_API_KEY` | 뉴스 AI 요약 (`/api/summary`) |
 
 - `.env.local`에 두고 **커밋하지 않음** (`.gitignore`에 `.env*`).
 - Finnhub 실패 시 **샘플 주가·뉴스**로 fallback (`data/sampleData.ts`). 샘플 뉴스 링크는 실제 도메인으로 유지.
+- **권장**: TLS 문제는 `FINNHUB_TLS_INSECURE` 대신 `NODE_EXTRA_CA_CERTS`에 기업 루트 인증서를 지정하는 편이 안전하다.
 
 ---
 
