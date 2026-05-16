@@ -40,7 +40,7 @@ describe("NewsList", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "AI요약" }));
+    await user.click(screen.getByRole("button", { name: "AI 요약" }));
 
     expect(await screen.findByText(/- 요약 1/)).toBeInTheDocument();
     expect(await screen.findByText(/- 요약 2/)).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe("NewsList", () => {
         ]}
       />,
     );
-    expect(screen.getByRole("button", { name: "AI요약" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "AI 요약" })).toBeDisabled();
   });
 });
 

@@ -1,4 +1,4 @@
-import { Agent } from "undici";
+import { withDevTlsBypass } from "@/lib/devTlsFetch";
 
 type FinnhubQuoteResponse = {
   c: number; // current
@@ -25,21 +25,6 @@ type FinnhubSymbolLookupResponse = {
 
 const FINNHUB_BASE_URL = "https://finnhub.io/api/v1";
 
-const tlsInsecure =
-  process.env.FINNHUB_TLS_INSECURE === "1" || process.env.FINNHUB_TLS_INSECURE === "true";
-
-/** 로컬 개발용(사내 CA 미설치 등). 프로덕션에서는 사용하지 말 것. */
-const finnhubDispatcher =
-  tlsInsecure && process.env.NODE_ENV !== "production"
-    ? new Agent({ connect: { rejectUnauthorized: false } })
-    : undefined;
-
-if (finnhubDispatcher) {
-  console.warn(
-    "[finnhub] FINNHUB_TLS_INSECURE 활성화: TLS 검증을 건너뜁니다. 가능하면 NODE_EXTRA_CA_CERTS로 기업 루트 인증서를 등록하세요.",
-  );
-}
-
 export class FinnhubConfigError extends Error {
   override name = "FinnhubConfigError";
 }
@@ -52,14 +37,13 @@ const getApiKey = (): string => {
 };
 
 const fetchJson = async <T>(url: string): Promise<T> => {
-  const init: RequestInit & { dispatcher?: Agent } = {
+  const init = withDevTlsBypass({
     headers: {
       accept: "application/json",
     },
     // App Router route handlers run on server; avoid caching during demos
     cache: "no-store",
-  };
-  if (finnhubDispatcher) init.dispatcher = finnhubDispatcher;
+  });
 
   const res = await fetch(url, init);
   if (!res.ok) {

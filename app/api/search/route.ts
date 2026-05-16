@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { SAMPLE_SYMBOL_LOOKUP } from "@/data/sampleData";
 import { fetchSymbolLookup, FinnhubConfigError } from "@/lib/finnhub";
-import { resolveSearchQuery } from "@/lib/searchAliases";
+import { getCuratedLookup, mergeLookupResults, resolveSearchQuery } from "@/lib/searchAliases";
 import type { SymbolLookupDto, SymbolLookupItemDto } from "@/lib/types";
 
 const takeTopN = <T,>(arr: readonly T[], n: number): T[] => arr.slice(0, n);
@@ -19,6 +19,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const raw = searchParams.get("q") ?? "";
   const { original: query, effective } = resolveSearchQuery(raw);
+  const curated = getCuratedLookup(raw);
 
   if (!query) {
     return NextResponse.json({ message: "종목 이름을 입력해주세요." }, { status: 400 });
@@ -26,13 +27,11 @@ export async function GET(req: Request) {
 
   try {
     const res = await fetchSymbolLookup(effective);
-    const mapped = takeTopN(
-      res.result
-        .filter((r) => isLikelyUsSymbol(r.symbol))
-        .map<SymbolLookupItemDto>((r) => ({ symbol: r.symbol, description: r.description }))
-        .filter((r) => r.symbol && r.description),
-      10,
-    );
+    const fromApi = res.result
+      .filter((r) => isLikelyUsSymbol(r.symbol))
+      .map<SymbolLookupItemDto>((r) => ({ symbol: r.symbol, description: r.description }))
+      .filter((r) => r.symbol && r.description);
+    const mapped = takeTopN(mergeLookupResults(curated, fromApi), 10);
     return NextResponse.json(toDto(query, mapped, false));
   } catch (err) {
     if (err instanceof FinnhubConfigError) {
@@ -41,10 +40,12 @@ export async function GET(req: Request) {
       console.error("[/api/search] Finnhub 요청 실패:", err);
     }
 
-    const fallback =
+    const fallback = mergeLookupResults(
+      curated,
       SAMPLE_SYMBOL_LOOKUP[query.toLowerCase()] ??
-      SAMPLE_SYMBOL_LOOKUP[effective.toLowerCase()] ??
-      [];
+        SAMPLE_SYMBOL_LOOKUP[effective.toLowerCase()] ??
+        [],
+    );
     return NextResponse.json(toDto(query, fallback, true));
   }
 }

@@ -7,69 +7,69 @@ type Props = {
   data: StockQuoteDto;
 };
 
-const Badge = ({ children }: { children: string }) => (
-  <span className="inline-flex items-center rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700">
-    {children}
-  </span>
+const StatusChip = ({ children }: { children: string }) => (
+  <span className="chip-badge">{children}</span>
 );
 
 export default function StockPriceCard({ data }: Props) {
   const isUp = data.change > 0;
   const isDown = data.change < 0;
 
+  const changeClass = isUp
+    ? "text-[var(--apple-ink)]"
+    : isDown
+      ? "text-[var(--apple-ink-muted-48)]"
+      : "text-[var(--apple-ink-muted-80)]";
+
   return (
-    <section className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
+    <section className="card-utility" aria-labelledby={`quote-${data.symbol}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">{data.symbol}</h2>
-          <p className="mt-1 text-sm text-zinc-600">주가 정보 (학습용)</p>
+          <h2 id={`quote-${data.symbol}`} className="text-display-lg text-[var(--apple-ink)]">
+            {data.symbol}
+          </h2>
+          <p className="text-caption mt-1 text-[var(--apple-body-muted)]">주가 정보</p>
         </div>
-        {data.isFallback ? <Badge>샘플 데이터</Badge> : <Badge>실시간</Badge>}
+        {data.isFallback ? <StatusChip>샘플 데이터</StatusChip> : <StatusChip>실시간</StatusChip>}
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl bg-zinc-50 p-4">
-          <div className="text-xs font-medium text-zinc-600">현재가</div>
-          <div className="mt-1 text-2xl font-semibold tabular-nums">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="stat-cell col-span-2 sm:col-span-1">
+          <p className="text-caption text-[var(--apple-body-muted)]">현재가</p>
+          <p className="mt-1 text-[28px] font-semibold tabular-nums tracking-tight text-[var(--apple-ink)]">
             {formatNumber2(data.currentPrice)}
-          </div>
+          </p>
         </div>
 
-        <div className="rounded-xl bg-zinc-50 p-4">
-          <div className="text-xs font-medium text-zinc-600">전일 종가</div>
-          <div className="mt-1 text-xl font-semibold tabular-nums">
+        <div className="stat-cell">
+          <p className="text-caption text-[var(--apple-body-muted)]">전일 종가</p>
+          <p className="mt-1 text-[21px] font-semibold tabular-nums text-[var(--apple-ink)]">
             {formatNumber2(data.previousClose)}
-          </div>
+          </p>
         </div>
 
-        <div className="rounded-xl bg-zinc-50 p-4">
-          <div className="text-xs font-medium text-zinc-600">전일 대비</div>
-          <div
-            className={[
-              "mt-1 text-xl font-semibold tabular-nums",
-              isUp ? "text-emerald-700" : "",
-              isDown ? "text-rose-700" : "",
-            ].join(" ")}
-          >
+        <div className="stat-cell">
+          <p className="text-caption text-[var(--apple-body-muted)]">전일 대비</p>
+          <p className={["mt-1 text-[21px] font-semibold tabular-nums", changeClass].join(" ")}>
+            {isUp ? "+" : ""}
             {formatNumber2(data.change)} ({formatPercent2(data.changePercent)})
-          </div>
+          </p>
         </div>
 
-        <div className="rounded-xl bg-zinc-50 p-4">
-          <div className="text-xs font-medium text-zinc-600">고가</div>
-          <div className="mt-1 text-xl font-semibold tabular-nums">
+        <div className="stat-cell">
+          <p className="text-caption text-[var(--apple-body-muted)]">고가</p>
+          <p className="mt-1 text-[21px] font-semibold tabular-nums text-[var(--apple-ink)]">
             {formatNumber2(data.high)}
-          </div>
+          </p>
         </div>
 
-        <div className="rounded-xl bg-zinc-50 p-4">
-          <div className="text-xs font-medium text-zinc-600">저가</div>
-          <div className="mt-1 text-xl font-semibold tabular-nums">
+        <div className="stat-cell">
+          <p className="text-caption text-[var(--apple-body-muted)]">저가</p>
+          <p className="mt-1 text-[21px] font-semibold tabular-nums text-[var(--apple-ink)]">
             {formatNumber2(data.low)}
-          </div>
+          </p>
         </div>
       </div>
     </section>
   );
 }
-

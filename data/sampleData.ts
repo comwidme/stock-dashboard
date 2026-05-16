@@ -63,6 +63,8 @@ export const SAMPLE_SYMBOL_LOOKUP: Record<string, SymbolLookupItemDto[]> = {
   microsoft: [{ symbol: "MSFT", description: "Microsoft Corporation" }],
   nvidia: [{ symbol: "NVDA", description: "NVIDIA Corporation" }],
   tesla: [{ symbol: "TSLA", description: "Tesla, Inc." }],
+  google: [{ symbol: "GOOGL", description: "Alphabet Inc." }],
+  alphabet: [{ symbol: "GOOGL", description: "Alphabet Inc." }],
   aapl: [{ symbol: "AAPL", description: "Apple Inc." }],
   msft: [{ symbol: "MSFT", description: "Microsoft Corporation" }],
   nvda: [{ symbol: "NVDA", description: "NVIDIA Corporation" }],

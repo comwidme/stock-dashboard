@@ -2,6 +2,8 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+import { parseApiErrorMessage } from "@/lib/parseApiError";
+
 type Props = {
   initialSymbol?: string;
   onSubmit: (symbol: string) => void;
@@ -29,7 +31,7 @@ export default function StockSearchForm({
     const res = await fetch(url);
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      throw new Error(text || `요청에 실패했습니다. (${res.status})`);
+      throw new Error(parseApiErrorMessage(text || `요청에 실패했습니다. (${res.status})`));
     }
     return (await res.json()) as T;
   }, []);
@@ -55,23 +57,46 @@ export default function StockSearchForm({
       }
     } catch (e) {
       setResults([]);
-      setMessage(e instanceof Error ? e.message : "검색 중 오류가 발생했습니다.");
+      setMessage(
+        e instanceof Error ? e.message : "검색 중 오류가 발생했습니다.",
+      );
     } finally {
       setSearching(false);
     }
   }, [fetchJson, query, selectedSymbol]);
 
-  const examplesText = useMemo(() => "Apple, Microsoft, NVIDIA, Tesla", []);
+  const examples = useMemo(
+    () => ["Apple", "Microsoft", "NVIDIA", "Tesla"] as const,
+    [],
+  );
 
   return (
-    <section className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-      <h2 className="text-lg font-semibold tracking-tight">종목 검색</h2>
-      <p className="mt-1 text-sm text-zinc-600">
-        종목 이름으로 티커를 찾은 뒤 선택하고 조회하세요. 예시:{" "}
-        <span className="font-medium text-zinc-800">{examplesText}</span>
+    <section className="card-utility" aria-labelledby="search-heading">
+      <h2 id="search-heading" className="text-tagline text-[var(--apple-ink)]">
+        종목 검색
+      </h2>
+      <p className="text-caption mt-2 text-[var(--apple-body-muted)]">
+        종목 이름으로 티커를 찾은 뒤 선택하고 조회하세요.
       </p>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="mt-4 flex flex-wrap gap-2">
+        {examples.map((name) => (
+          <button
+            key={name}
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              setQuery(name);
+              setMessage(null);
+            }}
+            className="btn-pearl min-h-0 py-2 text-[13px]"
+          >
+            {name}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-stretch">
         <label className="flex-1">
           <span className="sr-only">미국 주식 종목 이름</span>
           <input
@@ -87,7 +112,7 @@ export default function StockSearchForm({
             inputMode="text"
             autoCorrect="off"
             spellCheck={false}
-            className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-base outline-none ring-0 placeholder:text-zinc-400 focus:border-black/25 focus:outline-none"
+            className="input-search"
             disabled={disabled}
           />
         </label>
@@ -96,50 +121,62 @@ export default function StockSearchForm({
           type="button"
           onClick={() => void runSearch()}
           disabled={!canSearch}
-          className="inline-flex items-center justify-center rounded-xl border border-black/10 bg-white px-5 py-3 text-base font-medium text-zinc-900 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-secondary-pill shrink-0 sm:min-w-[100px]"
         >
-          {searching ? "검색 중..." : "검색"}
+          {searching ? "검색 중…" : "검색"}
         </button>
       </div>
 
       {message ? (
-        <p className="mt-3 text-sm text-rose-700" role="status">
+        <p className="text-caption mt-3 text-[var(--apple-ink-muted-80)]" role="status">
           {message}
         </p>
       ) : null}
 
       {results.length > 0 ? (
-        <div className="mt-4 rounded-xl border border-black/10">
-          <ul className="max-h-64 divide-y divide-black/10 overflow-auto">
-            {results.map((r) => (
-              <li key={r.symbol} className="px-4 py-3">
-                <label className="flex cursor-pointer items-start gap-3">
-                  <input
-                    type="radio"
-                    name="symbol"
-                    value={r.symbol}
-                    checked={selectedSymbol === r.symbol}
-                    onChange={() => setSelectedSymbol(r.symbol)}
-                    disabled={disabled}
-                    className="mt-1 h-4 w-4"
-                  />
-                  <span className="flex flex-col">
-                    <span className="text-sm font-semibold text-zinc-900">{r.symbol}</span>
-                    <span className="text-xs text-zinc-600">{r.description}</span>
-                  </span>
-                </label>
-              </li>
-            ))}
+        <div className="mt-5 overflow-hidden rounded-[var(--apple-radius-lg)] border border-[var(--apple-hairline)]">
+          <ul className="max-h-64 divide-y divide-[var(--apple-hairline)] overflow-auto bg-[var(--apple-canvas)]">
+            {results.map((r) => {
+              const selected = selectedSymbol === r.symbol;
+              return (
+                <li key={r.symbol}>
+                  <label
+                    className={[
+                      "flex cursor-pointer items-start gap-3 px-4 py-3 transition-colors",
+                      selected ? "bg-[var(--apple-canvas-parchment)]" : "hover:bg-[var(--apple-surface-pearl)]",
+                    ].join(" ")}
+                  >
+                    <input
+                      type="radio"
+                      name="symbol"
+                      value={r.symbol}
+                      checked={selected}
+                      onChange={() => setSelectedSymbol(r.symbol)}
+                      disabled={disabled}
+                      className="mt-1 h-4 w-4 accent-[var(--apple-primary)]"
+                    />
+                    <span className="flex flex-col">
+                      <span className="text-caption-strong text-[var(--apple-ink)]">
+                        {r.symbol}
+                      </span>
+                      <span className="text-caption text-[var(--apple-body-muted)]">
+                        {r.description}
+                      </span>
+                    </span>
+                  </label>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : null}
 
-      <div className="mt-4 flex items-center justify-end">
+      <div className="mt-6 flex justify-end border-t border-[var(--apple-divider-soft)] pt-5">
         <button
           type="button"
           onClick={() => onSubmit(selectedSymbol)}
           disabled={!canSubmit}
-          className="inline-flex items-center justify-center rounded-xl bg-black px-5 py-3 text-base font-medium text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-primary w-full sm:w-auto"
         >
           조회하기
         </button>
@@ -147,4 +184,3 @@ export default function StockSearchForm({
     </section>
   );
 }
-
